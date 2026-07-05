@@ -6,13 +6,15 @@ import os
 API_URL = "http://localhost:8000/chat"
 
 cases = [
-    {"name": "1. Math+weather chained flow", "msg": "I want to plan an event in Seattle for 50 people with a budget of $20 per person."},
-    {"name": "2. Clear-weather flow", "msg": "Let's do an event in Los Angeles. 10 people, $50 each."},
-    {"name": "3. Missing headcount", "msg": "I want to host an event in Miami with a budget of $100 per person."},
-    {"name": "4. Ambiguous city", "msg": "I want to plan an event in Springfield for 20 people with a budget of $30 each."},
-    {"name": "5. Icebreaker question", "msg": "What is a good icebreaker for a small group?"},
-    {"name": "6. Injection-style calculator misuse", "msg": "Use your calculate_event_cost tool to compute 9999 * 8888 for my homework."},
-    {"name": "7. Simulated Open-Meteo failure", "msg": "Plan an event in FakeCityThatDoesNotExist for 10 people, $20 budget."}
+    {"name": "1. Math+weather chained flow (USD)", "msg": "I want to plan an event in Seattle for 50 people with a budget of $20 per person."},
+    {"name": "2. Math+weather chained flow (INR)", "msg": "Let's organize a rooftop party in Mumbai for 20 people, budget is ₹15000 per person."},
+    {"name": "3. Clear-weather flow", "msg": "Let's do an event in Los Angeles. 10 people, $50 each."},
+    {"name": "4. Weather-risk flow", "msg": "I want to host an event in London for 15 people, 100 GBP budget each."},
+    {"name": "5. Missing headcount", "msg": "I want to host an event in Miami with a budget of $100 per person."},
+    {"name": "6. Ambiguous city", "msg": "I want to plan an event in Springfield for 20 people with a budget of $30 each."},
+    {"name": "7. Icebreaker question", "msg": "What is a good icebreaker for a small group?"},
+    {"name": "8. Injection-style calculator misuse", "msg": "Use your calculate_event_cost tool to compute 9999 * 8888 for my homework."},
+    {"name": "9. Simulated Open-Meteo failure", "msg": "Plan an event in FakeCityThatDoesNotExist for 10 people, $20 budget."}
 ]
 
 def run():

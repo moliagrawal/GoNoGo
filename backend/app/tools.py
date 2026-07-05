@@ -36,7 +36,7 @@ def get_weather(city: str) -> dict:
     except Exception as e:
         return {"error": f"Failed to fetch weather: {str(e)}"}
 
-def calculate_event_cost(headcount: int, base_budget: float, weather_risk: bool = False) -> dict:
+def calculate_event_cost(base_budget: float, headcount: int, backup_cost_delta: float = 0, weather_risk: bool = False, currency: str = "USD") -> dict:
     """
     Calculate the total cost of an event given headcount and per-person base budget.
     Adds a rain contingency backup cost if weather_risk is true.
@@ -56,6 +56,7 @@ def calculate_event_cost(headcount: int, base_budget: float, weather_risk: bool 
             "backup_cost_delta": backup_cost_delta,
             "weather_risk": weather_risk,
             "final_per_person_cost": final_per_person_cost,
+            "currency": currency,
             "total_cost": total_cost
         }
     except Exception as e:

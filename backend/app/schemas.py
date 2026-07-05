@@ -18,4 +18,5 @@ class PlanSummary(BaseModel):
     backup_cost_delta: float
     weather_risk: bool
     final_per_person_cost: float
+    currency: str
     recommendation: str

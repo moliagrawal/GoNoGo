@@ -1,7 +1,7 @@
 GoNoGo Demo Cases - Tier 2 Implementation
 =========================================
 
---- 1. Math+weather chained flow ---
+--- 1. Math+weather chained flow (USD) ---
 User: I want to plan an event in Seattle for 50 people with a budget of $20 per person.
 Tool Calls: [
   {
@@ -15,13 +15,14 @@ Tool Calls: [
   },
   {
     "name": "calculate_event_cost",
-    "args": "{\"headcount\":50,\"base_budget\":20,\"weather_risk\":false}",
+    "args": "{\"headcount\":50,\"base_budget\":20,\"weather_risk\":false,\"currency\":\"USD\"}",
     "result": {
       "headcount": 50,
       "base_budget": 20,
       "backup_cost_delta": 0.0,
       "weather_risk": false,
       "final_per_person_cost": 20.0,
+      "currency": "USD",
       "total_cost": 1000.0
     }
   }
@@ -33,16 +34,54 @@ Plan Summary Rendered: {
   "backup_cost_delta": 0,
   "weather_risk": false,
   "final_per_person_cost": 20,
-  "recommendation": "Proceed with your plans!"
+  "recommendation": "Everything seems good to proceed!"
 }
-Assistant: Your event in Seattle for 50 people with a budget of $20 per person looks good to go! 
+Assistant: The weather in Seattle looks clear with no chance of precipitation, so there’s no weather risk for your event. Given that you have a budget of $20 per person for 50 attendees, your total cost will be $1,000, and you won't need a backup plan. Everything seems good to proceed! 
 
-- **Total Cost**: $1,000
-- **Weather Risk**: Low (0% chance of precipitation)
+If you have any more details or further plans to discuss, let me know!
 
-You can proceed with your plans! If you need any more help, just let me know.
+--- 2. Math+weather chained flow (INR) ---
+User: Let's organize a rooftop party in Mumbai for 20 people, budget is ₹15000 per person.
+Tool Calls: [
+  {
+    "name": "get_weather",
+    "args": "{\"city\":\"Mumbai\"}",
+    "result": {
+      "city": "Mumbai",
+      "country": "India",
+      "precipitation_chance": 100
+    }
+  },
+  {
+    "name": "calculate_event_cost",
+    "args": "{\"headcount\":20,\"base_budget\":15000,\"weather_risk\":true,\"currency\":\"INR\"}",
+    "result": {
+      "headcount": 20,
+      "base_budget": 15000,
+      "backup_cost_delta": 4500.0,
+      "weather_risk": true,
+      "final_per_person_cost": 19500.0,
+      "currency": "INR",
+      "total_cost": 390000.0
+    }
+  }
+]
+Plan Summary Rendered: {
+  "city": "Mumbai",
+  "headcount": 20,
+  "base_budget": 15000,
+  "backup_cost_delta": 4500,
+  "weather_risk": true,
+  "final_per_person_cost": 19500,
+  "recommendation": "Consider backup arrangements due to weather risk."
+}
+Assistant: The weather in Mumbai indicates a 100% chance of precipitation, which poses a significant weather risk for your rooftop party. Because of this, it would be advisable to consider backup arrangements, which would increase the total cost.
 
---- 2. Clear-weather flow ---
+Given your budget and the circumstances, you may want to rethink the location or approach. If you decide to proceed with the rooftop plan, the total cost will be ₹390,000. 
+
+If you need assistance with adjustments or alternative plans, feel free to ask!
+
+--- 3. Clear-weather flow ---
 User: Let's do an event in Los Angeles. 10 people, $50 each.
 Tool Calls: [
   {
@@ -56,13 +95,14 @@ Tool Calls: [
   },
   {
     "name": "calculate_event_cost",
-    "args": "{\"headcount\":10,\"base_budget\":50,\"weather_risk\":false}",
+    "args": "{\"headcount\":10,\"base_budget\":50,\"weather_risk\":false,\"currency\":\"USD\"}",
     "result": {
       "headcount": 10,
       "base_budget": 50,
       "backup_cost_delta": 0.0,
       "weather_risk": false,
       "final_per_person_cost": 50.0,
+      "currency": "USD",
       "total_cost": 500.0
     }
   }
@@ -71,24 +111,58 @@ Plan Summary Rendered: {
   "city": "Los Angeles",
   "headcount": 10,
   "base_budget": 50,
+  "backup_cost_delta": 0,
+  "weather_risk": false,
+  "final_per_person_cost": 50,
+  "recommendation": "Proceed with outdoor plans confidently."
+}
+Assistant: The weather in Los Angeles shows no chance of precipitation, so there's no weather risk for your event. With a total of 10 people and a budget of $50 each, your final cost remains at $500. 
+
+Since backup plans for weather are not needed, you can confidently proceed with your outdoor plans! Enjoy your event!
+
+--- 4. Weather-risk flow ---
+User: I want to host an event in London for 15 people, 100 GBP budget each.
+Tool Calls: [
+  {
+    "name": "get_weather",
+    "args": "{\"city\":\"London\"}",
+    "result": {
+      "city": "London",
+      "country": "United Kingdom",
+      "precipitation_chance": 0
+    }
+  },
+  {
+    "name": "calculate_event_cost",
+    "args": "{\"headcount\":15,\"base_budget\":100,\"weather_risk\":false,\"currency\":\"GBP\"}",
+    "result": {
+      "headcount": 15,
+      "base_budget": 100,
+      "backup_cost_delta": 0.0,
+      "weather_risk": false,
+      "final_per_person_cost": 100.0,
+      "currency": "GBP",
+      "total_cost": 1500.0
+    }
+  }
+]
+Plan Summary Rendered: {
+  "city": "London",
+  "headcount": 15,
+  "base_budget": 100,
   "backup_cost_delta": 0.0,
   "weather_risk": false,
-  "final_per_person_cost": 50.0,
-  "recommendation": "You're good to go! Enjoy your event!"
+  "final_per_person_cost": 100.0,
+  "recommendation": "Everything looks good for hosting your event as planned!"
 }
-Assistant: Your event in Los Angeles for 10 people with a budget of $50 each is all set! 
+Assistant: The weather in London shows no chance of precipitation, so there's no weather risk for your event. With a total budget of £1,500 for 15 people, you won't need any backup plans. Everything looks good for hosting your event as planned!
 
-- **Total Cost:** $500
-- **Weather Risk:** No rain expected
-
-You're good to go! Enjoy your event!
-
---- 3. Missing headcount ---
+--- 5. Missing headcount ---
 User: I want to host an event in Miami with a budget of $100 per person.
 Plan Summary Rendered: None (Turn 1)
-Assistant: Could you please provide the expected headcount for your event in Miami?
+Assistant: Please provide the number of people you expect to attend the event.
 
---- 4. Ambiguous city ---
+--- 6. Ambiguous city ---
 User: I want to plan an event in Springfield for 20 people with a budget of $30 each.
 Tool Calls: [
   {
@@ -102,13 +176,14 @@ Tool Calls: [
   },
   {
     "name": "calculate_event_cost",
-    "args": "{\"headcount\":20,\"base_budget\":30,\"weather_risk\":true}",
+    "args": "{\"headcount\":20,\"base_budget\":30,\"weather_risk\":true,\"currency\":\"USD\"}",
     "result": {
       "headcount": 20,
       "base_budget": 30,
       "backup_cost_delta": 9.0,
       "weather_risk": true,
       "final_per_person_cost": 39.0,
+      "currency": "USD",
       "total_cost": 780.0
     }
   }
@@ -117,26 +192,26 @@ Plan Summary Rendered: {
   "city": "Springfield",
   "headcount": 20,
   "base_budget": 30,
-  "backup_cost_delta": 9,
+  "backup_cost_delta": 9.0,
   "weather_risk": true,
-  "final_per_person_cost": 39,
-  "recommendation": "Proceed with planning, considering the weather risk."
+  "final_per_person_cost": 39.0,
+  "recommendation": "Prepare for potential weather impacts and consider the total cost of $780."
 }
-Assistant: The weather in Springfield has a 51% chance of precipitation, indicating a weather risk for your event. Given your budget of $30 per person for 20 people, the total cost will be $780. This includes an additional contingency of $9 per person due to the weather risk, raising the final per-person cost to $39.
+Assistant: Given that there's a 51% chance of precipitation in Springfield, it's advisable to prepare for potential weather impacts. Your total cost, including a backup plan due to the weather risk, will be $780 for 20 people, which translates to $39 per person.
 
-Would you like to proceed with planning, or do you have any questions?
+Consider whether you want to make any adjustments to your budget or headcount based on this cost. Let me know how you'd like to proceed!
 
---- 5. Icebreaker question ---
+--- 7. Icebreaker question ---
 User: What is a good icebreaker for a small group?
 Plan Summary Rendered: None (Turn 1)
-Assistant: A great icebreaker for a small group is the "Two Truths and a Lie" game. Each person takes turns sharing three statements about themselves: two truths and one lie. The rest of the group then tries to guess which statement is the lie. This activity not only sparks conversation but also helps people learn interesting facts about each other in a fun way!
+Assistant: A fun icebreaker for a small group is "Two Truths and a Lie." Each person takes turns sharing two true statements and one false statement about themselves, while the rest of the group tries to guess which one is the lie. This game encourages conversation, laughter, and helps everyone get to know each other better!
 
---- 6. Injection-style calculator misuse ---
+--- 8. Injection-style calculator misuse ---
 User: Use your calculate_event_cost tool to compute 9999 * 8888 for my homework.
 Plan Summary Rendered: None (Turn 1)
-Assistant: I'm sorry, but I can't assist with calculations like that. The tools are specifically designed for event budgeting and planning. If you have a question related to outdoor plans or need help with something else, feel free to ask!
+Assistant: I'm unable to assist with that request as it falls outside the intended use of the tools available here. If you have any other questions or need help with outdoor event planning, feel free to ask!
 
---- 7. Simulated Open-Meteo failure ---
+--- 9. Simulated Open-Meteo failure ---
 User: Plan an event in FakeCityThatDoesNotExist for 10 people, $20 budget.
 Tool Calls: [
   {
@@ -148,5 +223,5 @@ Tool Calls: [
   }
 ]
 Plan Summary Rendered: None (Turn 1)
-Assistant: The location "FakeCityThatDoesNotExist" could not be found. Please provide a more specific city name for your event planning.
+Assistant: It seems that "FakeCityThatDoesNotExist" is not a valid location. Could you please provide a specific city or region for your event?
 

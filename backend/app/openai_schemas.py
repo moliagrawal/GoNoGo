@@ -37,9 +37,13 @@ TOOL_SCHEMAS = [
                     "weather_risk": {
                         "type": "boolean",
                         "description": "Whether rain contingency is needed based on weather."
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO 4217 currency code inferred from the user's message, e.g. USD, INR, EUR. Default to USD if not specified."
                     }
                 },
-                "required": ["headcount", "base_budget", "weather_risk"],
+                "required": ["headcount", "base_budget", "weather_risk", "currency"],
                 "additionalProperties": False
             },
             "strict": True
