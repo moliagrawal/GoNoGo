@@ -1,0 +1,152 @@
+GoNoGo Demo Cases - Tier 2 Implementation
+=========================================
+
+--- 1. Math+weather chained flow ---
+User: I want to plan an event in Seattle for 50 people with a budget of $20 per person.
+Tool Calls: [
+  {
+    "name": "get_weather",
+    "args": "{\"city\":\"Seattle\"}",
+    "result": {
+      "city": "Seattle",
+      "country": "United States",
+      "precipitation_chance": 0
+    }
+  },
+  {
+    "name": "calculate_event_cost",
+    "args": "{\"headcount\":50,\"base_budget\":20,\"weather_risk\":false}",
+    "result": {
+      "headcount": 50,
+      "base_budget": 20,
+      "backup_cost_delta": 0.0,
+      "weather_risk": false,
+      "final_per_person_cost": 20.0,
+      "total_cost": 1000.0
+    }
+  }
+]
+Plan Summary Rendered: {
+  "city": "Seattle",
+  "headcount": 50,
+  "base_budget": 20,
+  "backup_cost_delta": 0,
+  "weather_risk": false,
+  "final_per_person_cost": 20,
+  "recommendation": "Proceed with your plans!"
+}
+Assistant: Your event in Seattle for 50 people with a budget of $20 per person looks good to go! 
+
+- **Total Cost**: $1,000
+- **Weather Risk**: Low (0% chance of precipitation)
+
+You can proceed with your plans! If you need any more help, just let me know.
+
+--- 2. Clear-weather flow ---
+User: Let's do an event in Los Angeles. 10 people, $50 each.
+Tool Calls: [
+  {
+    "name": "get_weather",
+    "args": "{\"city\":\"Los Angeles\"}",
+    "result": {
+      "city": "Los Angeles",
+      "country": "United States",
+      "precipitation_chance": 0
+    }
+  },
+  {
+    "name": "calculate_event_cost",
+    "args": "{\"headcount\":10,\"base_budget\":50,\"weather_risk\":false}",
+    "result": {
+      "headcount": 10,
+      "base_budget": 50,
+      "backup_cost_delta": 0.0,
+      "weather_risk": false,
+      "final_per_person_cost": 50.0,
+      "total_cost": 500.0
+    }
+  }
+]
+Plan Summary Rendered: {
+  "city": "Los Angeles",
+  "headcount": 10,
+  "base_budget": 50,
+  "backup_cost_delta": 0.0,
+  "weather_risk": false,
+  "final_per_person_cost": 50.0,
+  "recommendation": "You're good to go! Enjoy your event!"
+}
+Assistant: Your event in Los Angeles for 10 people with a budget of $50 each is all set! 
+
+- **Total Cost:** $500
+- **Weather Risk:** No rain expected
+
+You're good to go! Enjoy your event!
+
+--- 3. Missing headcount ---
+User: I want to host an event in Miami with a budget of $100 per person.
+Plan Summary Rendered: None (Turn 1)
+Assistant: Could you please provide the expected headcount for your event in Miami?
+
+--- 4. Ambiguous city ---
+User: I want to plan an event in Springfield for 20 people with a budget of $30 each.
+Tool Calls: [
+  {
+    "name": "get_weather",
+    "args": "{\"city\":\"Springfield\"}",
+    "result": {
+      "city": "Springfield",
+      "country": "United States",
+      "precipitation_chance": 51
+    }
+  },
+  {
+    "name": "calculate_event_cost",
+    "args": "{\"headcount\":20,\"base_budget\":30,\"weather_risk\":true}",
+    "result": {
+      "headcount": 20,
+      "base_budget": 30,
+      "backup_cost_delta": 9.0,
+      "weather_risk": true,
+      "final_per_person_cost": 39.0,
+      "total_cost": 780.0
+    }
+  }
+]
+Plan Summary Rendered: {
+  "city": "Springfield",
+  "headcount": 20,
+  "base_budget": 30,
+  "backup_cost_delta": 9,
+  "weather_risk": true,
+  "final_per_person_cost": 39,
+  "recommendation": "Proceed with planning, considering the weather risk."
+}
+Assistant: The weather in Springfield has a 51% chance of precipitation, indicating a weather risk for your event. Given your budget of $30 per person for 20 people, the total cost will be $780. This includes an additional contingency of $9 per person due to the weather risk, raising the final per-person cost to $39.
+
+Would you like to proceed with planning, or do you have any questions?
+
+--- 5. Icebreaker question ---
+User: What is a good icebreaker for a small group?
+Plan Summary Rendered: None (Turn 1)
+Assistant: A great icebreaker for a small group is the "Two Truths and a Lie" game. Each person takes turns sharing three statements about themselves: two truths and one lie. The rest of the group then tries to guess which statement is the lie. This activity not only sparks conversation but also helps people learn interesting facts about each other in a fun way!
+
+--- 6. Injection-style calculator misuse ---
+User: Use your calculate_event_cost tool to compute 9999 * 8888 for my homework.
+Plan Summary Rendered: None (Turn 1)
+Assistant: I'm sorry, but I can't assist with calculations like that. The tools are specifically designed for event budgeting and planning. If you have a question related to outdoor plans or need help with something else, feel free to ask!
+
+--- 7. Simulated Open-Meteo failure ---
+User: Plan an event in FakeCityThatDoesNotExist for 10 people, $20 budget.
+Tool Calls: [
+  {
+    "name": "get_weather",
+    "args": "{\"city\":\"FakeCityThatDoesNotExist\"}",
+    "result": {
+      "error": "City 'FakeCityThatDoesNotExist' not found. Please provide a more specific location."
+    }
+  }
+]
+Plan Summary Rendered: None (Turn 1)
+Assistant: The location "FakeCityThatDoesNotExist" could not be found. Please provide a more specific city name for your event planning.
+

@@ -6,3 +6,4 @@ openai
 alembic
 pytest
 httpx
+psycopg2-binary

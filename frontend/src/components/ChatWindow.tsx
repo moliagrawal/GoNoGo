@@ -7,6 +7,7 @@ interface DisplayMessage {
   role: "user" | "assistant";
   content: string;
   toolCalls?: ToolCall[];
+  planSummary?: any;
 }
 
 export function ChatWindow() {
@@ -29,7 +30,7 @@ export function ChatWindow() {
     try {
       const res = await sendMessage(input, sessionId);
       setSessionId(res.session_id);
-      setMessages((prev) => [...prev, { role: "assistant", content: res.reply, toolCalls: res.tool_calls }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: res.reply, toolCalls: res.tool_calls, planSummary: res.plan_summary }]);
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong. Please try again." }]);
     } finally {
@@ -42,7 +43,7 @@ export function ChatWindow() {
       <h1 className="text-2xl font-semibold mb-4">GoNoGo</h1>
       <div className="flex-1 overflow-y-auto border rounded-xl p-4">
         {messages.map((m, i) => (
-          <MessageBubble key={i} role={m.role} content={m.content} toolCalls={m.toolCalls} />
+          <MessageBubble key={i} role={m.role} content={m.content} toolCalls={m.toolCalls} planSummary={m.planSummary} />
         ))}
         {loading && <div className="text-sm text-gray-400">Thinking...</div>}
         <div ref={bottomRef} />

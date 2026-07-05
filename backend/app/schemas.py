@@ -9,6 +9,7 @@ class ChatResponse(BaseModel):
     session_id: int
     reply: str
     tool_calls: list[dict] = []
+    plan_summary: Optional[dict] = None
 
 class PlanSummary(BaseModel):
     city: str

@@ -40,8 +40,8 @@ def chat(req: ChatRequest, db: DBSession = Depends(get_db)):
             raise HTTPException(status_code=404, detail="session not found")
         session_id = req.session_id
 
-    reply, tool_calls = run_agent(db, session_id, req.message)
-    return ChatResponse(session_id=session_id, reply=reply, tool_calls=tool_calls)
+    reply, tool_calls, plan_summary = run_agent(db, session_id, req.message)
+    return ChatResponse(session_id=session_id, reply=reply, tool_calls=tool_calls, plan_summary=plan_summary)
 
 @app.get("/health")
 def health():
