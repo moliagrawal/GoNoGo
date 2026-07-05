@@ -50,7 +50,7 @@ export function ChatWindow() {
       </div>
       <div className="flex mt-4 gap-2">
         <input
-          className="flex-1 border rounded-full px-4 py-2 text-black"
+          className="flex-1 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-black dark:text-white rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
