@@ -6,9 +6,9 @@ GoNoGo is an event planning assistant powered by AI.
 
 ```mermaid
 graph TD
-    A[Next.js Frontend\n(Vercel)] -->|HTTP| B[FastAPI Backend\n(Render/Railway)]
-    B -->|Tool calls| C[External Services\nOpenAI API, Open-Meteo API]
-    B -->|Persistence| D[PostgreSQL]
+    A["Next.js Frontend<br/>(Vercel)"] -->|HTTP| B["FastAPI Backend<br/>(Render/Railway)"]
+    B -->|Tool calls| C["External Services<br/>OpenAI API, Open-Meteo API"]
+    B -->|Persistence| D["PostgreSQL"]
 ```
 
 ## Features
