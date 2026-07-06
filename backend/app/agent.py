@@ -25,9 +25,12 @@ PLAN_SUMMARY_JSON_SCHEMA = {
         "weather_risk": {"type": "boolean"},
         "final_per_person_cost": {"type": "number"},
         "currency": {"type": "string"},
-        "recommendation": {"type": "string"}
+        "recommendation": {"type": "string"},
+        "precip_chance": {"type": "integer"},
+        "temp": {"type": "integer"},
+        "date": {"type": "string", "description": "The date of the event, e.g. '2026-07-09' or 'Today'. Extract from tool results if available."}
     },
-    "required": ["city", "headcount", "base_budget", "backup_cost_delta", "weather_risk", "final_per_person_cost", "currency", "recommendation"],
+    "required": ["city", "headcount", "base_budget", "backup_cost_delta", "weather_risk", "final_per_person_cost", "currency", "recommendation", "precip_chance", "temp", "date"],
     "additionalProperties": False
 }
 
@@ -59,11 +62,15 @@ def extract_plan_summary(final_reply: str, tool_results: list[dict]) -> dict | N
         logger.warning(f"Plan summary extraction failed (non-fatal): {e}")
         return None
 
-def dispatch_tool(name: str, raw_args: str) -> dict:
+def dispatch_tool(name: str, raw_args: str, target_date: str = None) -> dict:
     try:
         args = json.loads(raw_args)
     except json.JSONDecodeError:
         return {"error": "malformed tool arguments"}
+        
+    if name == "get_weather" and target_date:
+        args["target_date"] = target_date
+        
     fn = TOOL_FUNCTIONS.get(name)
     if not fn:
         return {"error": f"unknown tool {name}"}
@@ -72,26 +79,33 @@ def dispatch_tool(name: str, raw_args: str) -> dict:
     except TypeError as e:
         return {"error": f"invalid arguments: {e}"}
 
-def build_history(db: DBSession, session_id: int) -> list[dict]:
+def build_history(db: DBSession, session_id: str, target_date: str = None) -> list[dict]:
     rows = db.query(Message).filter_by(session_id=session_id).order_by(Message.id).all()
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    
+    prompt = SYSTEM_PROMPT
+    if target_date:
+        prompt += f"\n\nNote: The user has specified the target date for their event as {target_date}. The get_weather tool will automatically use this date."
+        
+    messages = [{"role": "system", "content": prompt}]
     for h in rows:
         if h.role == "tool":
             messages.append({"role": "tool", "content": h.content, "tool_call_id": h.tool_name})
         elif h.role == "assistant" and h.tool_name == "tool_calls":
             messages.append({"role": "assistant", "content": None, "tool_calls": json.loads(h.content)})
+        elif h.role == "assistant" and h.tool_name == "plan_summary":
+            continue
         else:
             messages.append({"role": h.role, "content": h.content})
     return messages
 
-def run_agent(db: DBSession, session_id: int, user_input: str) -> tuple[str, list[dict], dict | None]:
+def run_agent(db: DBSession, session_id: str, user_input: str, target_date: str = None) -> tuple[str, list[dict], dict | None]:
     if not user_input.strip():
         return "Please enter a question or plan.", [], None
 
     db.add(Message(session_id=session_id, role="user", content=user_input))
     db.commit()
 
-    messages = build_history(db, session_id)
+    messages = build_history(db, session_id, target_date)
     tool_call_log = []
 
     try:
@@ -110,7 +124,7 @@ def run_agent(db: DBSession, session_id: int, user_input: str) -> tuple[str, lis
         db.add(Message(session_id=session_id, role="assistant", tool_name="tool_calls", content=json.dumps([t.model_dump() for t in msg.tool_calls])))
         
         for call in msg.tool_calls:
-            result = dispatch_tool(call.function.name, call.function.arguments)
+            result = dispatch_tool(call.function.name, call.function.arguments, target_date)
             logger.info(f"[TOOL] {call.function.name}({call.function.arguments}) -> {result}")
             tool_call_log.append({"name": call.function.name, "args": call.function.arguments, "result": result})
             messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result)})
@@ -131,5 +145,8 @@ def run_agent(db: DBSession, session_id: int, user_input: str) -> tuple[str, lis
     db.commit()
     
     plan_summary = extract_plan_summary(final_text, tool_call_log)
+    if plan_summary:
+        db.add(Message(session_id=session_id, role="assistant", tool_name="plan_summary", content=json.dumps(plan_summary)))
+        db.commit()
     
     return final_text, tool_call_log, plan_summary

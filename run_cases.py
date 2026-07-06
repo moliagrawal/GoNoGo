@@ -2,8 +2,11 @@ import httpx
 import time
 import json
 import os
+import datetime
 
 API_URL = "http://localhost:8000/chat"
+
+target_date = (datetime.datetime.now() + datetime.timedelta(days=5)).strftime("%Y-%m-%d")
 
 cases = [
     {"name": "1. Math+weather chained flow (USD)", "msg": "I want to plan an event in Seattle for 50 people with a budget of $20 per person."},
@@ -14,7 +17,9 @@ cases = [
     {"name": "6. Ambiguous city", "msg": "I want to plan an event in Springfield for 20 people with a budget of $30 each."},
     {"name": "7. Icebreaker question", "msg": "What is a good icebreaker for a small group?"},
     {"name": "8. Injection-style calculator misuse", "msg": "Use your calculate_event_cost tool to compute 9999 * 8888 for my homework."},
-    {"name": "9. Simulated Open-Meteo failure", "msg": "Plan an event in FakeCityThatDoesNotExist for 10 people, $20 budget."}
+    {"name": "9. Simulated Open-Meteo failure", "msg": "Plan an event in FakeCityThatDoesNotExist for 10 people, $20 budget."},
+    {"name": "10. Date + Currency chained flow", "msg": "Planning an event in Sydney for 30 people, budget is $100 AUD per person.", "target_date": target_date},
+    {"name": "11. Simple arithmetic", "msg": "what's 17% of 4820"}
 ]
 
 def run():
@@ -42,9 +47,14 @@ def run():
             try:
                 session_id = None
                 current_msg = case['msg']
+                case_date = case.get('target_date')
                 
                 for turn in range(2):
-                    resp = httpx.post(API_URL, json={"message": current_msg, "session_id": session_id}, timeout=60.0)
+                    payload = {"message": current_msg, "session_id": session_id}
+                    if case_date:
+                        payload["target_date"] = case_date
+                        
+                    resp = httpx.post(API_URL, json=payload, timeout=60.0)
                     resp.raise_for_status()
                     data = resp.json()
                     session_id = data.get("session_id")

@@ -9,6 +9,8 @@ interface Props {
   planSummary?: PlanSummary;
 }
 
+import ReactMarkdown from "react-markdown";
+
 export function MessageBubble({ role, content, toolCalls, planSummary }: Props) {
   const isUser = role === "user";
   // Only render bubble if there is actual content
@@ -17,8 +19,14 @@ export function MessageBubble({ role, content, toolCalls, planSummary }: Props) 
       {toolCalls?.map((tc, i) => <ToolBadge key={i} name={tc.name} />)}
       {planSummary && <PlanSummaryCard summary={planSummary} />}
       {content && (
-        <div className={`max-w-md rounded-2xl px-4 py-2 ${isUser ? "bg-amber-500 text-white" : "bg-gray-800 text-gray-100"}`}>
-          {content}
+        <div className={`max-w-md rounded-2xl px-4 py-2 ${isUser ? "bg-primary text-white" : "bg-white border border-secondary/20 text-bg-dark"}`}>
+          {role === "assistant" ? (
+            <div className="prose prose-sm max-w-none text-bg-dark">
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
+          ) : (
+            <span>{content}</span>
+          )}
         </div>
       )}
     </div>

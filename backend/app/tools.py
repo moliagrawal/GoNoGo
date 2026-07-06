@@ -1,6 +1,6 @@
 import httpx
 
-def get_weather(city: str) -> dict:
+def get_weather(city: str, target_date: str = None) -> dict:
     """
     Get the current weather for a given city using Open-Meteo.
     """
@@ -20,18 +20,37 @@ def get_weather(city: str) -> dict:
         location = geo_data["results"][0]
         lat, lon = location["latitude"], location["longitude"]
         
-        # Step 2: Weather forecast (get precipitation probability)
-        weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=precipitation_probability_max&timezone=auto"
+        # Step 2: Weather forecast (get precipitation probability and max temperature)
+        weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=precipitation_probability_max,temperature_2m_max&current_weather=true&timezone=auto"
         weather_resp = httpx.get(weather_url, timeout=5.0)
         weather_resp.raise_for_status()
         weather_data = weather_resp.json()
         
-        precip_prob = weather_data["daily"]["precipitation_probability_max"][0]
+        times = weather_data["daily"]["time"]
+        precip_probs = weather_data["daily"]["precipitation_probability_max"]
+        max_temps = weather_data["daily"].get("temperature_2m_max", [])
         
+        index = 0
+        if target_date and target_date in times:
+            index = times.index(target_date)
+        elif target_date:
+            return {"error": f"Forecast for {target_date} is unavailable. We only have data for {times[0]} to {times[-1]}."}
+
+        precip_prob = precip_probs[index]
+        
+        # Determine temperature
+        temperature = None
+        if index == 0 and "current_weather" in weather_data:
+            temperature = weather_data["current_weather"].get("temperature")
+        elif index < len(max_temps):
+            temperature = max_temps[index]
+            
         return {
             "city": location["name"],
             "country": location.get("country", ""),
-            "precipitation_chance": precip_prob
+            "precipitation_chance": precip_prob,
+            "temperature": temperature,
+            "forecast_date": times[index]
         }
     except Exception as e:
         return {"error": f"Failed to fetch weather: {str(e)}"}
