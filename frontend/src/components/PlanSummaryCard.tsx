@@ -1,3 +1,5 @@
+import { Sun, CloudRain } from "lucide-react";
+
 export interface PlanSummary {
   city: string;
   headcount: number;
@@ -23,13 +25,15 @@ export function PlanSummaryCard({ summary }: { summary: PlanSummary | null }) {
     <div className={`rounded-xl p-4 my-2 border-l-4 ${isRisk ? "border-amber-400 bg-amber-50" : "border-green-400 bg-green-50"}`}>
       <div className="flex justify-between items-center mb-1">
         <h3 className="font-semibold text-gray-800">{summary.city} — {summary.headcount} people</h3>
-        <span className="text-sm">{isRisk ? "🌧️" : "☀️"}</span>
+        <span className="text-sm flex items-center justify-center">
+          {isRisk ? <CloudRain className="text-amber-500 w-5 h-5" /> : <Sun className="text-amber-500 w-5 h-5" />}
+        </span>
       </div>
       <div className="text-3xl font-bold text-gray-900 my-2">
         {formatCurrency(summary.final_per_person_cost, summary.currency)}
         <span className="text-sm font-normal text-gray-500"> /person</span>
       </div>
-      <span className={`inline-block text-xs font-semibold px-2 py-1 rounded-full ${isRisk ? "bg-amber-200 text-amber-900" : "bg-green-200 text-green-900"}`}>
+      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${isRisk ? "bg-amber-200 text-amber-900" : "bg-green-200 text-green-900"}`}>
         {isRisk ? "⚠️ GO WITH BACKUP" : "✅ GO"}
       </span>
     </div>

@@ -44,7 +44,7 @@ def run():
                 current_msg = case['msg']
                 
                 for turn in range(2):
-                    resp = httpx.post(API_URL, json={"message": current_msg, "session_id": session_id}, timeout=30.0)
+                    resp = httpx.post(API_URL, json={"message": current_msg, "session_id": session_id}, timeout=60.0)
                     resp.raise_for_status()
                     data = resp.json()
                     session_id = data.get("session_id")

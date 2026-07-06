@@ -24,9 +24,10 @@ PLAN_SUMMARY_JSON_SCHEMA = {
         "backup_cost_delta": {"type": "number"},
         "weather_risk": {"type": "boolean"},
         "final_per_person_cost": {"type": "number"},
+        "currency": {"type": "string"},
         "recommendation": {"type": "string"}
     },
-    "required": ["city", "headcount", "base_budget", "backup_cost_delta", "weather_risk", "final_per_person_cost", "recommendation"],
+    "required": ["city", "headcount", "base_budget", "backup_cost_delta", "weather_risk", "final_per_person_cost", "currency", "recommendation"],
     "additionalProperties": False
 }
 
